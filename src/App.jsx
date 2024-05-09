@@ -12,7 +12,7 @@ import UserContext from './context/UserContext';
 
 function App() {
   const { login } = useContext(AuthContext);
-  const clientId = process.env.REACT_APP_CLIENT_ID  
+  const clientId = "722348533329-fcvbgk9bl8qerclkpoav4quk9gcsfbnl.apps.googleusercontent.com"  
   const [userInfo, setUserInfo] = useState([])
 
   const verifyToken = () => {

@@ -17,7 +17,7 @@ function App() {
     const access_key = localStorage.getItem("access_token");
     const username = localStorage.getItem("username");
 
-    fetch('/datacore/token/verify/', {
+    fetch('http://localhost:8000/datacore/api/v1/token/verify/', {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

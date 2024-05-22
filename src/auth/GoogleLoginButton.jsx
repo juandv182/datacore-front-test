@@ -8,7 +8,7 @@ const GoogleLoginButton = () => {
   const handleSuccess = (codeResponse) => {
     const authorizationCode = codeResponse.code;
 
-    fetch("/datacore/login-with-google/", {
+    fetch("http://localhost:8000/datacore/api/v1/login-with-google/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,8 +24,11 @@ const GoogleLoginButton = () => {
           localStorage.setItem("username", data["username"]);
           localStorage.setItem("first_name", data["first_name"]);
           localStorage.setItem("last_name", data["last_name"]);
-          navigate('/welcome');
-          window.location.reload();
+          console.log(data["username"]);
+          console.log(data["first_name"]);
+          console.log(data["last_name"]);
+          navigate('/Home');
+          
         }
       })
       .catch((error) => {

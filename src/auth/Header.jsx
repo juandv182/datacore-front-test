@@ -1,7 +1,6 @@
 import React, {useContext} from 'react'
 import GoogleLoginButton from './GoogleLoginButton'
 import UserContext from '../context/UserContext'
-import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom';
 
 const Header = () => {

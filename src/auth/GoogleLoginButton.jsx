@@ -8,7 +8,7 @@ const GoogleLoginButton = () => {
   const handleSuccess = (codeResponse) => {
     const authorizationCode = codeResponse.code;
 
-    fetch("/user/login-with-google/", {
+    fetch("/datacore/login-with-google/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

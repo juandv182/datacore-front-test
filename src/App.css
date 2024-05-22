@@ -18,7 +18,7 @@ html {
 }
 
 .background-image{
-  background-image: url('../resources/Portada_Pabellon_A.jpg');
+  background-image: url('../assets/Portada_Pabellon_A.jpg');
   height: 100vh; /* Establece la altura al 100% de la ventana del navegador */
   background-position: center;
   background-repeat: no-repeat;

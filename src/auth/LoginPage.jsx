@@ -5,6 +5,7 @@ export const LoginPage = () =>{
     return (
 
         <div className='container'>
+        <div className='background-image'></div>
         <div className='white-container'>
           <img src={logo} className='logo'></img>
           <img src={logoDataCore} className='imgdatacore'></img>

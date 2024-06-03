@@ -1,11 +1,12 @@
 import servicioSolicitudImagen from '../assets/iconoSolicitud.png';
+
 import { Link } from 'react-router-dom';
 
 function Home() {
     return (
       <div className="ml-4 mt-4" style={{ marginLeft: '20px', marginRight: '20px' }}>
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
-          <h1 style={{ fontSize: '36px', marginBottom: '20px' , color: "rgb(4, 35, 84)"}}>
+          <h1 style={{ color: "rgb(4, 35, 84)" }} className="font-bold text-3xl mb-4">
             Hola, Usuario. ¿Qué tal tu día?
           </h1>
           <hr style={{ width: '100%', borderTop: '4px solid rgb(4, 35, 84)'}} />

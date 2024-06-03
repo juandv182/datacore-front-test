@@ -1,0 +1,101 @@
+[
+    {
+      "id": 1,
+      "duracion": "24h",
+      "fechaRegistro": "24/09/24 20:00",
+      "fechaInicio": "24/09/24 20:00",
+      "fechaFin": "24/09/24 20:00",
+      "estado": "Pendiente",
+      "cancelar": "",
+      "detalle": "",
+      "resultados": ""
+    },
+    {
+      "id": 2,
+      "duracion": "24h",
+      "fechaRegistro": "24/09/24 20:00",
+      "fechaInicio": "24/09/24 20:00",
+      "fechaFin": "24/09/24 20:00",
+      "estado": "Pendiente",
+      "cancelar": "",
+      "detalle": "",
+      "resultados": ""
+    },
+    {
+      "id": 3,
+      "duracion": "24h",
+      "fechaRegistro": "24/09/24 20:00",
+      "fechaInicio": "24/09/24 20:00",
+      "fechaFin": "24/09/24 20:00",
+      "estado": "Pendiente",
+      "cancelar": "",
+      "detalle": "",
+      "resultados": ""
+    },
+    {
+        "id": 4,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      },
+      {
+        "id": 5,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      },
+      {
+        "id": 6,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      },
+      {
+        "id": 7,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      },
+      {
+        "id": 8,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      },
+      {
+        "id": 9,
+        "duracion": "24h",
+        "fechaRegistro": "24/09/24 20:00",
+        "fechaInicio": "24/09/24 20:00",
+        "fechaFin": "24/09/24 20:00",
+        "estado": "Pendiente",
+        "cancelar": "",
+        "detalle": "",
+        "resultados": ""
+      }
+  ]

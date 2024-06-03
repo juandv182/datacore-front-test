@@ -1,0 +1,9 @@
+{
+    "id":3,
+    "fechaRegistro":"24/09/24 20:00",
+    "estado": "Pendiente",
+    "cup": "Intel® Core™ i9 processor 14900T",
+    "cantidadNucleo": 24,
+    "frecuenciaDelProcesador": "5.50 GHz",
+    "ram":"192 GB"
+}

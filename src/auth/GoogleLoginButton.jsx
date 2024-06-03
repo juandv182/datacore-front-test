@@ -1,10 +1,12 @@
-import GoogleButton from 'react-google-button';
-import React from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import GoogleButton from "react-google-button";
+import React, { useContext } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 
 const GoogleLoginButton = () => {
   const navigate = useNavigate();
+  const { handlerLogin } = useContext(AuthContext);
   const handleSuccess = (codeResponse) => {
     const authorizationCode = codeResponse.code;
 
@@ -18,17 +20,17 @@ const GoogleLoginButton = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          navigate('/error');
+          navigate("/error");
         } else {
           localStorage.setItem("access_token", data["access_token"]);
           localStorage.setItem("username", data["username"]);
           localStorage.setItem("first_name", data["first_name"]);
           localStorage.setItem("last_name", data["last_name"]);
+          localStorage.setItem("is_admin", data["is_admin"]);
           console.log(data["username"]);
           console.log(data["first_name"]);
           console.log(data["last_name"]);
-          navigate('/Home');
-          
+          handlerLogin({ googleUser: { username: data["username"] } });
         }
       })
       .catch((error) => {
@@ -42,8 +44,8 @@ const GoogleLoginButton = () => {
   });
 
   return (
-    <div className='google-login-button-container'>
-      <div className='button-container'>
+    <div className="google-login-button-container">
+      <div className="button-container">
         <GoogleButton onClick={login} label="Continuar con Google" />
       </div>
     </div>

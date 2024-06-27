@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createGPU } from "../api/RecursoDropdown";
+import { createGPU } from "../api/Recursos";
 import CloseIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -13,7 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import DiscardChangesModal from "./DiscardChangesModal";
+import WarningModal from "./WarningModal";
+import LoadingOverlay from "./LoadingOverlay";
 
 /**
  * Modal para agregar GPU.
@@ -47,6 +48,7 @@ function AddGPUModal({ open, onClose, onSuccess }) {
   const [formErrors, setFormErrors] = useState(initialFormErrors);
   const [isFormValid, setIsFormValid] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Establece el formulario como válido si todos los campos están llenos
   useEffect(() => {
@@ -88,7 +90,7 @@ function AddGPUModal({ open, onClose, onSuccess }) {
 
   const handleCancelClose = (event, reason) => {
     // Omite clics fuera del modal de confirmación de descarte
-    if (reason && reason === "backdropClick") {
+    if (reason && (reason === "backdropClick" || saving)) {
       return;
     }
     toggleDiscardModal();
@@ -101,12 +103,17 @@ function AddGPUModal({ open, onClose, onSuccess }) {
 
   const handleSubmit = async () => {
     if (isFormValid) {
+      setSaving(true);
       const gpuData = {
         id_recurso: {
           solicitudes_encoladas: 0,
           tamano_ram: parseInt(formData.vram),
           estado: formData.estado === "enabled" ? true : false,
           ubicacion: formData.ubicacion,
+          herramientas: [],
+          direccion_ip: "",
+          user: "",
+          password: "",
         },
         nombre: formData.nombre,
         numero_nucleos_gpu: parseInt(formData.numNucleos),
@@ -119,6 +126,8 @@ function AddGPUModal({ open, onClose, onSuccess }) {
         returnToTable();
       } catch (error) {
         console.error("Error al crear GPU:", error);
+      } finally {
+        setSaving(false);
       }
     }
   };
@@ -132,6 +141,12 @@ function AddGPUModal({ open, onClose, onSuccess }) {
         fullWidth={true}
         disableRestoreFocus
       >
+        {saving && (
+          <LoadingOverlay
+            backgroundColor={"rgba(255, 255, 255, 0.5)"}
+            content={"Guardando..."}
+          />
+        )}
         <DialogTitle
           sx={{ m: 0, p: 2, color: "primary.main" }}
           id="dialog-title"
@@ -147,6 +162,7 @@ function AddGPUModal({ open, onClose, onSuccess }) {
             top: 12,
             color: (theme) => theme.palette.grey[500],
           }}
+          disabled={saving}
         >
           <CloseIcon />
         </IconButton>
@@ -254,11 +270,17 @@ function AddGPUModal({ open, onClose, onSuccess }) {
         </DialogActions>
       </Dialog>
 
-      <DiscardChangesModal
+      <WarningModal
         open={showDiscardModal}
         onClose={handleCancelClose}
         onConfirm={handleConfirmClose}
-      ></DiscardChangesModal>
+        content={{
+          title: "¿Estás seguro de que quieres salir?",
+          body: "Se perderán todos los datos.",
+          cancelText: "No, continuar editando",
+          confirmText: "Sí, descartar y salir",
+        }}
+      ></WarningModal>
     </div>
   );
 }

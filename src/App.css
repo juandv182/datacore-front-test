@@ -7,7 +7,7 @@ html {
   box-sizing: border-box; /* Hack para Box Model **/
   scroll-snap-type: y mandatory;
 }
-body{
+body {
   font-size: 16px; /* 1rem = 10px */
 }
 *,
@@ -22,7 +22,7 @@ body{
 }
 
 .background-image {
-  background-image: url("/src/assets/Portada_Pabellon_A.jpg");
+  background-image: url("/src/assets/pabellon_a.jpg");
   height: 100vh; /* Establece la altura al 100% de la ventana del navegador */
   background-position: center;
   background-repeat: no-repeat;
@@ -80,7 +80,8 @@ body{
 }
 
 .white-container .imgdatacore {
-  width: 65%;
-  height: 30%;
+  width: 80%;
+  height: auto;
   object-fit: contain;
 }
+

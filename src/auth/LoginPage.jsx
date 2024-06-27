@@ -1,5 +1,5 @@
-import logo from "../assets/PUCP-alta_resolucion-1.png";
-import logoDataCore from "../assets/Imagen DataCore.png";
+import pucpLogo from "../assets/pucp_logo.png";
+import serverIcon from "../assets/server_icon.svg";
 import Header from "./Header";
 
 export const LoginPage = () => {
@@ -7,8 +7,8 @@ export const LoginPage = () => {
     <div className="container">
       <div className="background-image"></div>
       <div className="white-container">
-        <img src={logo} className="logo"></img>
-        <img src={logoDataCore} className="imgdatacore"></img>
+        <img src={pucpLogo} className="logo"></img>
+        <img src={serverIcon} className="imgdatacore"></img>
         <h1 className="titulo">DataCore</h1>
         <h2 className="subtitulo">
           Plataforma que ofrece servicios computacionales para la Comunidad de

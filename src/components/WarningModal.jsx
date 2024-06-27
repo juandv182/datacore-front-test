@@ -1,18 +1,24 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningIcon from "@mui/icons-material/Warning";
 
 /**
- * Modal para operaciones finalizadas con éxito
+ * Modal para confirmar acciones importantes.
  *
  * @param {object} props
  * @param {boolean} props.open Indica la visibilidad del modal
- * @param {() => void} props.onClose Se ejecuta al salir del modal
- * @param {string} props.content Contenido del mensaje mostrado
+ * @param {() => void} props.onClose Se ejecuta al salir o al elegir "continuar"
+ * @param {() => void} props.onConfirm Se ejecuta al elegir "descartar"
+ * @param {{
+ *   title: string,
+ *   body: string,
+ *   cancelText: string,
+ *   confirmText: string
+ * }} props.content Contenido del modal
  * @returns {JSX.Element}
  */
-function SuccessModal({ open, onClose, content }) {
+function WarningModal({ open, onClose, onConfirm, content }) {
   return (
     <div>
       <Dialog
@@ -37,13 +43,15 @@ function SuccessModal({ open, onClose, content }) {
               color: "primary.main",
             }}
           >
-            <CheckCircleIcon sx={{ mb: 2, fontSize: "5rem" }} />
-            <p className="text-center text-2xl font-semibold">¡Todo listo!</p>
+            <WarningIcon sx={{ mb: 2, fontSize: "5rem", color: "#B9333A" }} />
+            <p className="text-center text-2xl font-semibold">
+              {content.title}
+            </p>
           </Box>
 
           {/* Contenido */}
           <Box sx={{ mt: 2, mb: 4, color: "primary.main" }}>
-            <p className="text-center">{content}</p>
+            <p className="text-center">{content.body}</p>
           </Box>
 
           {/* Botones */}
@@ -51,12 +59,16 @@ function SuccessModal({ open, onClose, content }) {
             sx={{
               mb: 2,
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
+              justifyContent: "center",
+              gap: "1.5rem",
             }}
           >
             <Button onClick={onClose} variant="contained">
-              Aceptar
+              {content.cancelText}
+            </Button>
+            <Button onClick={onConfirm} variant="outlined">
+              {content.confirmText}
             </Button>
           </Box>
         </Box>
@@ -64,4 +76,5 @@ function SuccessModal({ open, onClose, content }) {
     </div>
   );
 }
-export default SuccessModal;
+
+export default WarningModal;

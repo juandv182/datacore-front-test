@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createCPU } from "../api/RecursoDropdown";
+import { createCPU } from "../api/Recursos";
 import CloseIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -13,7 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import DiscardChangesModal from "./DiscardChangesModal";
+import WarningModal from "./WarningModal";
+import LoadingOverlay from "./LoadingOverlay";
 
 /**
  * Modal para agregar CPU.
@@ -47,6 +48,7 @@ function AddCPUModal({ open, onClose, onSuccess }) {
   const [formErrors, setFormErrors] = useState(initialFormErrors);
   const [isFormValid, setIsFormValid] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Establece el formulario como válido si todos los campos están llenos
   useEffect(() => {
@@ -88,7 +90,7 @@ function AddCPUModal({ open, onClose, onSuccess }) {
 
   const handleCancelClose = (event, reason) => {
     // Omite clics fuera del modal de confirmación de descarte
-    if (reason && reason === "backdropClick") {
+    if (reason && (reason === "backdropClick" || saving)) {
       return;
     }
     toggleDiscardModal();
@@ -101,12 +103,17 @@ function AddCPUModal({ open, onClose, onSuccess }) {
 
   const handleSubmit = async () => {
     if (isFormValid) {
+      setSaving(true);
       const cpuData = {
         id_recurso: {
           solicitudes_encoladas: 0,
           tamano_ram: parseInt(formData.ram),
           estado: formData.estado === "enabled" ? true : false,
           ubicacion: formData.ubicacion,
+          herramientas: [],
+          direccion_ip: "",
+          user: "",
+          password: "",
         },
         nombre: formData.nombre,
         numero_nucleos_cpu: parseInt(formData.numNucleos),
@@ -118,6 +125,8 @@ function AddCPUModal({ open, onClose, onSuccess }) {
         returnToTable();
       } catch (error) {
         console.error("Error al crear CPU:", error);
+      } finally {
+        setSaving(false);
       }
     }
   };
@@ -131,6 +140,12 @@ function AddCPUModal({ open, onClose, onSuccess }) {
         fullWidth={true}
         disableRestoreFocus
       >
+        {saving && (
+          <LoadingOverlay
+            backgroundColor={"rgba(255, 255, 255, 0.5)"}
+            content={"Guardando..."}
+          />
+        )}
         <DialogTitle
           sx={{ m: 0, p: 2, color: "primary.main" }}
           id="dialog-title"
@@ -146,6 +161,7 @@ function AddCPUModal({ open, onClose, onSuccess }) {
             top: 12,
             color: (theme) => theme.palette.grey[500],
           }}
+          disabled={saving}
         >
           <CloseIcon />
         </IconButton>
@@ -253,11 +269,17 @@ function AddCPUModal({ open, onClose, onSuccess }) {
         </DialogActions>
       </Dialog>
 
-      <DiscardChangesModal
+      <WarningModal
         open={showDiscardModal}
         onClose={handleCancelClose}
         onConfirm={handleConfirmClose}
-      ></DiscardChangesModal>
+        content={{
+          title: "¿Estás seguro de que quieres salir?",
+          body: "Se perderán todos los datos.",
+          cancelText: "No, continuar editando",
+          confirmText: "Sí, descartar y salir",
+        }}
+      ></WarningModal>
     </div>
   );
 }

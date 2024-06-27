@@ -12,7 +12,8 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import { readCPU, updateCPU } from "../api/RecursoDropdown";
+import LoadingOverlay from "./LoadingOverlay";
+import { readCPU, updateCPU } from "../api/Recursos";
 
 /**
  * Modal para editar CPU.
@@ -46,6 +47,8 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
   const [formData, setFormData] = useState(initialFormData);
   const [formErrors, setFormErrors] = useState(initialFormErrors);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Establece el formulario como válido si todos los campos están llenos
   useEffect(() => {
@@ -62,13 +65,18 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
     });
   };
 
-  const handleClose = () => {
+  const handleClose = (event, reason) => {
+    if (reason && (reason === "backdropClick" || saving || loading)) {
+      return;
+    }
     onClose();
+    setFormData(initialFormData);
     setFormErrors(initialFormErrors);
   };
 
   const handleSubmit = async () => {
     if (isFormValid) {
+      setSaving(true);
       const cpuData = {
         id_recurso: {
           tamano_ram: parseInt(formData.ram),
@@ -85,12 +93,15 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
         handleClose();
       } catch (error) {
         console.error("Error al editar CPU:", error);
+      } finally {
+        setSaving(false);
       }
     }
   };
 
   useEffect(() => {
     const fetchSelectedCPU = async (id) => {
+      setLoading(true);
       try {
         const response = await readCPU(id);
         const data = response.data;
@@ -105,6 +116,8 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
         setFormData(cpu);
       } catch (error) {
         console.error("Error al cargar datos de CPU:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -122,6 +135,12 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
         fullWidth={true}
         disableRestoreFocus
       >
+        {saving && (
+          <LoadingOverlay
+            backgroundColor={"rgba(255, 255, 255, 0.5)"}
+            content={"Guardando..."}
+          />
+        )}
         <DialogTitle
           sx={{ m: 0, p: 2, color: "primary.main" }}
           id="dialog-title"
@@ -137,10 +156,17 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             top: 12,
             color: (theme) => theme.palette.grey[500],
           }}
+          disabled={loading || saving}
         >
           <CloseIcon />
         </IconButton>
-        <DialogContent dividers sx={{ p: 2 }}>
+        <DialogContent dividers sx={{ p: 2, position: "relative" }}>
+          {loading && (
+            <LoadingOverlay
+              backgroundColor={"white"}
+              content={"Cargando datos..."}
+            />
+          )}
           {/* Nombre */}
           <TextField
             autoFocus
@@ -153,6 +179,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             value={formData.nombre}
             error={formErrors.nombre}
             onChange={handleChange}
+            disabled={saving}
           />
 
           {/* Núcleos */}
@@ -167,6 +194,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             value={formData.numNucleos}
             error={formErrors.numNucleos}
             onChange={handleChange}
+            disabled={saving}
           />
 
           {/* Frecuencia */}
@@ -184,6 +212,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             value={formData.frecuencia}
             error={formErrors.frecuencia}
             onChange={handleChange}
+            disabled={saving}
           />
 
           {/* RAM */}
@@ -201,6 +230,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             value={formData.ram}
             error={formErrors.ram}
             onChange={handleChange}
+            disabled={saving}
           />
 
           {/* Ubicación */}
@@ -214,6 +244,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
             value={formData.ubicacion}
             error={formErrors.ubicacion}
             onChange={handleChange}
+            disabled={saving}
           />
 
           {/* Estado */}
@@ -227,6 +258,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
               value={formData.estado}
               error={formErrors.estado}
               onChange={handleChange}
+              disabled={saving}
             >
               <MenuItem value="enabled">Habilitado</MenuItem>
               <MenuItem value="disabled">Deshabilitado</MenuItem>
@@ -237,7 +269,7 @@ function EditCPUModal({ open, onClose, onSuccess, id }) {
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={!isFormValid}
+            disabled={!isFormValid || saving}
           >
             Confirmar
           </Button>

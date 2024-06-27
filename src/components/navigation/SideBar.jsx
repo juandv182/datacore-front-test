@@ -5,82 +5,126 @@ import {
   FaHistory,
   FaInbox,
   FaCog,
+  FaRegUserCircle,
 } from "react-icons/fa";
 import { BsCpuFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import { navbarHeight } from "./NavBar";
 
-const Sidebar = ({ sidebarToggle }) => {
+const sidebarButtonStyles = {
+  width: "100%",
+  borderRadius: "0px",
+  paddingTop: "0.75rem",
+  paddingBottom: "0.75rem",
+};
+
+const adminModules = [
+  {
+    name: "Usuarios autorizados",
+    path: "/usuarios-autorizados",
+    icon: <FaUserShield />,
+  },
+  {
+    name: "Usuarios desautorizados",
+    path: "/usuarios-desautorizados",
+    icon: <FaUserSlash />,
+  },
+  {
+    name: "Historial",
+    path: "/historial",
+    icon: <FaHistory />,
+  },
+  {
+    name: "Recursos",
+    path: "/recursos",
+    icon: <BsCpuFill />,
+  },
+  {
+    name: "Ajustes",
+    path: "/ajustes",
+    icon: <FaCog />,
+  },
+];
+
+const userModules = [
+  {
+    name: "Home",
+    path: "/home",
+    icon: <FaHome />,
+  },
+  {
+    name: "Solicitudes",
+    path: "/solicitudes",
+    icon: <FaInbox />,
+  },
+];
+
+function Sidebar({ sidebarToggle }) {
+  const theme = useTheme();
+  const isAdmin = localStorage.getItem("is_admin") === "true";
+  const modules = isAdmin ? adminModules : userModules;
+
   return (
     <div
       className={`${
         sidebarToggle ? "hidden" : "block"
-      } w-64 fixed h-full px-4 py-4`}
-      style={{ backgroundColor: "rgba(4, 35, 84, 1)" }}
+      } w-64 fixed h-full flex flex-col bg-white z-10`}
     >
-      <div className="my-2 mb-4">
-        <h1 className="text-xl text-white font-bold">Admin Dashboard</h1>
+      {/* Información del usuario */}
+      <div
+        className="flex flex-col flex-none items-center justify-center px-4 py-2 h-full"
+        style={{ height: navbarHeight }}
+      >
+        <FaRegUserCircle
+          size={40}
+          className="text-gray-800"
+          style={{ color: theme.palette.primary.main }}
+        ></FaRegUserCircle>
+
+        <p
+          className="text-gray-800 font-semibold"
+          style={{ color: theme.palette.primary.main }}
+        >
+          {localStorage.getItem("first_name") +
+            " " +
+            localStorage.getItem("last_name")}
+        </p>
+
+        <p className="text-gray-400">
+          {isAdmin ? "(Administrador)" : "(Usuario)"}
+        </p>
       </div>
-      <hr></hr>
-      <ul className="mt-3 text-white font-semibold">
-        <Link to="home">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaHome className="inline-block w-6 h-5 mr-3 -mt-2"></FaHome>
-              Home
-            </button>
-          </li>
-        </Link>
-        <Link to="usuarios-autorizados">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaUserShield className="inline-block w-6 h-5 mr-3 -mt-2"></FaUserShield>
-              Usuarios autorizados
-            </button>
-          </li>
-        </Link>
-        <Link to="usuarios-no-autorizados">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaUserSlash className="inline-block w-6 h-5 mr-3 -mt-2"></FaUserSlash>
-              Usuarios no autorizados
-            </button>
-          </li>
-        </Link>
-        <Link to="historial">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaHistory className="inline-block w-6 h-5 mr-3 -mt-2"></FaHistory>
-              Historial
-            </button>
-          </li>
-        </Link>
-        <Link to="recursos">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <BsCpuFill className="inline-block w-6 h-5 mr-3 -mt-2"></BsCpuFill>
-              Recursos
-            </button>
-          </li>
-        </Link>
-        <Link to="solicitudes">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaInbox className="inline-block w-6 h-6 mr-3 -mt-2"></FaInbox>
-              Solicitudes
-            </button>
-          </li>
-        </Link>
-        <Link to="ajustes">
-          <li className="mb-2 rounded hover:shadow hover:bg-blue-500 py-2">
-            <button className="px-3 text-sm">
-              <FaCog className="inline-block w-6 h-6 mr-3 -mt-2"></FaCog>
-              Ajustes
-            </button>
-          </li>
-        </Link>
-      </ul>
+
+      {/* Módulos */}
+      <div className="flex flex-col grow gap-3">
+        {modules.map((module, index) => (
+          <Button
+            key={index}
+            component={Link}
+            to={module.path}
+            variant="contained"
+            disableElevation
+            size="small"
+            startIcon={module.icon}
+            sx={sidebarButtonStyles}
+          >
+            {module.name}
+          </Button>
+        ))}
+      </div>
+
+      {/* Logo */}
+      <div className="py-4 flex justify-center items-center">
+        <img
+          src="/src/assets/pucp_logo.png"
+          alt="PUCP"
+          style={{ maxWidth: "180px", height: "auto" }}
+        />
+      </div>
     </div>
   );
-};
+}
 
 export default Sidebar;

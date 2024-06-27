@@ -7,6 +7,7 @@ import { AuthContext } from "./auth/context/AuthContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import UserContext from "./context/UserContext";
+import ErrorPage from "./auth/ErrorPage";
 
 function App() {
   const { login } = useContext(AuthContext);
@@ -18,7 +19,7 @@ function App() {
     const access_key = localStorage.getItem("access_token");
     const username = localStorage.getItem("username");
 
-    fetch("http://localhost:8000/datacore/api/v1/token/verify/", {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/datacore/api/v1/token/verify/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +43,9 @@ function App() {
   }, []);
 
   const updateUserInfo = (value) => {
+    
     setUserInfo(value);
+    console.log(userInfo)
   };
 
   return (
@@ -58,6 +61,7 @@ function App() {
               <>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/*" element={<Navigate to="/login" />} />
+                <Route path="/error" element={<ErrorPage />} />
               </>
             )}
           </Routes>

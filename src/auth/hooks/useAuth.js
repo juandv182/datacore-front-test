@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { loginReducer } from "../reducers/loginReducer";
 import { loginUser } from "../services/authService";
+import EditUserModal from "../../components/EditUserModal";
 
 const initialLogin = JSON.parse(sessionStorage.getItem("Login")) || {
   isAuth: false,
@@ -62,6 +63,8 @@ export const useAuth = () => {
         localStorage.removeItem('first_name');
         localStorage.removeItem('last_name');
         localStorage.removeItem('is_admin');
+        localStorage.removeItem('estado');
+        localStorage.removeItem('id_user');
     }
     return {
         login,

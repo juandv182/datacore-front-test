@@ -1,374 +1,290 @@
-import * as React from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { parseISO, format } from "date-fns";
 
-//MUI
-import Button from "@mui/material/Button";
+// MUI
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import { DataGrid } from "@mui/x-data-grid";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import CloseIcon from "@mui/icons-material/Close";
-import { TextField } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
-import Modal from "@mui/material/Modal";
-import DialogContentText from "@mui/material/DialogContentText";
-import SimCardDownloadIcon from "@mui/icons-material/SimCardDownload";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
-//APIs
-import { getAllSolicitudes } from "../api/Solicitudes";
-import { getSolicitudDetalle } from "../api/Solicitudes";
-import { getSolicitudResultado } from "../api/Solicitudes";
-import { deleteSolicitud } from "../api/Solicitudes";
+// APIs
+import {
+  getAllSolicitudes,
+  getSolicitudResultado,
+  deleteSolicitud,
+} from "../api/Solicitudes";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 600,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
-
-
+// Components
+import NoRowsOverlay from "../components/NoRowsOverlay";
+import ProgressModal from "../components/ProgressModal";
+import SolicitudDetailsModal from "../components/SolicitudDetailsModal";
+import SuccessModal from "../components/SuccessModal";
+import WarningModal from "../components/WarningModal";
 
 function Solicitudes() {
-  
-  var selectedID ;
-  const [lid, setTextId] = useState();
-  const [lfecharegistro, setTextFechaRegistro] = useState();
-  const [lestado, setTextEstado] = useState();
-  const [lcpu, setTextCPU] = useState();
-  const [lnucleo, setTextCantidadNucleo] = useState();
-  const [lfrecuencia, setTextFrecuenciaProcesador] = useState();
-  const [ltamano, setTextTamanoRAM] = useState();
+  const [solicitudList, setSolicitudList] = useState([]);
+  const [selectedSolicitudView, setSelectedSolicitudView] = useState(0);
+  const [selectedSolicitudDelete, setSelectedSolicitudDelete] = useState(0);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
-  //Detalle
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const abrirdetalle = (id) => {
-    console.log("Detalle: "+id)
-    cargarDetalles(id)
-    
-    setOpen(true);
-  };
-  //Cancelar
-  const [openC, setOpenC] = React.useState(false);
+  const navigate = useNavigate();
 
-  const abrirCancelar = (id) => {
-    selectedID = id
-    setOpenC(true);
-  };
-
-  const handleCloseC = () => {
-    setOpenC(false);
-  };
-
-  const confirmarCancelar = () => {
-    cancelarSolicitudes(selectedID)
-    setOpenC(false);
-  };
-
-  //Acciones
-
-  useEffect(() => {
-    loadPage();
-}, []);
-
-  //Redirigir a nueva solicitud
-  const nuevaSolicitud = () => {
-    useNavigate("/recursos-ofrecidos");
-  };
-
-  //Exportar Solicitudes
-  const exportarSolicitudes = () => {
-    const csvData = rows.map((row) => Object.values(row).join(",")).join("\n");
-    const csvBlob = new Blob([csvData], { type: "text/csv" });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const link = document.createElement("a");
-    link.href = csvUrl;
-    link.download = "solicitudes.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  //Cargar resultado de solicitud *
-const descargarDoc = (id) => {
-    getSolicitudResultado(id)
-    .then((response) => {
-        // Assuming the response is a Blob
-        const url = window.URL.createObjectURL(new Blob([response]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'file.txt'); // or any other filename
-        document.body.appendChild(link);
-        link.click();
-    })
-    .catch((error) => {
-      console.error("Error fetching solicitudes:", error);
-    });
-};
-
-  const [rows, setRows] = useState([]);
-
-  //Cargar datos *
-  const loadPage = () => {
-    getAllSolicitudes()
-      .then((response) => {
-        setRows(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching solicitudes:", error);
-      });
-  };
-
-  const [modalData, setModalData] = useState({});
-  //Cargar detalles
-  const cargarDetalles =(id)=>{
-    getSolicitudDetalle(id)
-      .then((response) => {
-        setTextId(response.data.id);
-        setTextFechaRegistro(response.data.fechaRegistro);
-        setTextEstado(response.data.estado);
-        setTextCPU(response.data.cup);
-        setTextCantidadNucleo(response.data.cantidadNucleo);
-        setTextFrecuenciaProcesador(response.data.frecuenciaDelProcesador);
-        setTextTamanoRAM(response.data.ram);
-      })
-      .catch((error) => {
-        console.error("Error fetching solicitudes:", error);
-      });
-  }
-
-  //Cancelar solicitud
-  const cancelarSolicitudes =(id)=>{
-    deleteSolicitud()
-    .then((response) => {
-      loadPage()
-        console.log(id+": Eliminado")
-    })
-    .catch((error) => {
-      console.error("Error fetching solicitudes:", error);
-    });
-  }
-
-
+  // Columnas de la tabla
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "duracion", headerName: "Duracion", width: 100 },
-    { field: "fechaRegistro", headerName: "Fecha de Registro", width: 150 },
-    { field: "fechaInicio", headerName: "Fecha de Inicio", width: 150 },
-    { field: "fechaFin", headerName: "Fecha de Fin", width: 150 },
-    { field: "estado", headerName: "Estado", width: 100 },
+    { field: "id_solicitud", headerName: "ID", width: 50 },
+    { field: "duracion", headerName: "Duración", width: 120 },
+    { field: "fecha_registro", headerName: "Fecha de registro", width: 220 },
+    { field: "fecha_procesamiento", headerName: "Fecha de inicio", width: 220 },
+    { field: "fecha_finalizada", headerName: "Fecha de fin", width: 220 },
+    { field: "estado_solicitud", headerName: "Estado", width: 150 },
     {
-field: "cancelar",
-headerName: "Cancelar",
-sortable: false,
-renderCell: (params) => {
-    return (
-        <Button 
-            startIcon={<CloseIcon />} 
-            onClick={() => abrirCancelar(params.row.id)}
-        >
-        </Button>
-    );
-},
+      field: "cancelar",
+      headerName: "Cancelar",
+      width: 100,
+      sortable: false,
+      renderCell: (params) => {
+        return params.row.estado_solicitud.toLowerCase() === "creada" ? (
+          <IconButton
+            onClick={() => openWarningModal(params.row.id_solicitud)}
+            disabled={deleting}
+          >
+            <CloseIcon sx={{ color: "#B9333A" }} />
+          </IconButton>
+        ) : null;
+      },
     },
     {
       field: "detalle",
       headerName: "Detalle",
-      width: 70,
+      width: 100,
       sortable: false,
-      renderCell: (params) => {
-        return (
-          <Button
-            startIcon={<RemoveRedEyeIcon />}
-            onClick={() => abrirdetalle(params.row.id)}
-          ></Button>
-        );
-      },
+      renderCell: (params) => (
+        <IconButton
+          onClick={() => openDetailsModal(params.row.id_solicitud)}
+          disabled={deleting}
+        >
+          <VisibilityIcon sx={{ color: "primary.main" }} />
+        </IconButton>
+      ),
     },
     {
       field: "resultados",
       headerName: "Resultados",
-      width: 130,
+      width: 150,
       sortable: false,
       renderCell: (params) => {
-        return (
-          <Button startIcon={<DownloadIcon />} onClick={() => descargarDoc(params.row.id)}>
+        return params.row.estado_solicitud.toLowerCase() === "finalizada" ? (
+          <Button
+            startIcon={<DownloadIcon />}
+            onClick={() => downloadResults(params.row.id_solicitud)}
+            disabled={deleting}
+          >
             Descargar
           </Button>
-        );
+        ) : null;
       },
     },
   ];
 
-  // Cuerpo de la pagina
-  return (
-    <div className="row m-4">
-      <h2
-        style={{ color: "rgb(4, 35, 84)" }}
-        className=" font-bold text-3xl mb-4"
-      >
-        Solicitudes
-      </h2>
+  // Obtiene la lista de solicitudes
+  const fetchSolicitudes = async () => {
+    setLoading(true);
 
-      <Link to="/recursos-ofrecidos">
+    try {
+      const response = await getAllSolicitudes(localStorage.getItem("id_user"));
+      const formattedData = response.data.map((item) => {
+        const registroYear = parseISO(item.fecha_registro).getUTCFullYear();
+        const procesamientoYear = parseISO(
+          item.fecha_procesamiento
+        ).getUTCFullYear();
+        const finalizadaYear = parseISO(item.fecha_finalizada).getUTCFullYear();
+
+        return {
+          ...item,
+          fecha_registro:
+            registroYear < 2000
+              ? "-"
+              : format(parseISO(item.fecha_registro), "dd/MM/yyyy HH:mm:ss a"),
+          fecha_procesamiento:
+            procesamientoYear < 2000
+              ? "-"
+              : format(
+                  parseISO(item.fecha_procesamiento),
+                  "dd/MM/yyyy HH:mm:ss a"
+                ),
+          fecha_finalizada:
+            finalizadaYear < 2000
+              ? "-"
+              : format(
+                  parseISO(item.fecha_finalizada),
+                  "dd/MM/yyyy HH:mm:ss a"
+                ),
+        };
+      });
+
+      setSolicitudList(formattedData);
+    } catch (error) {
+      console.error("Error al cargar solicitudes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carga la tabla al renderizar el componente
+  useEffect(() => {
+    fetchSolicitudes();
+  }, []);
+
+  // Redirige a la página de nueva solicitud
+  const handleCreateSolicitud = () => {
+    navigate("/recursos-ofrecidos");
+  };
+
+  // Funciones para cancelación de solicitud
+
+  const openWarningModal = (id) => {
+    setSelectedSolicitudDelete(id);
+    setShowWarningModal(true);
+  };
+
+  const handleCancelDeletion = () => {
+    setShowWarningModal(false);
+  };
+
+  const handleConfirmDeletion = () => {
+    cancelarSolicitud();
+    setShowWarningModal(false);
+  };
+
+  const cancelarSolicitud = async () => {
+    setDeleting(true);
+    try {
+      await deleteSolicitud(selectedSolicitudDelete);
+      setDeleteSuccess(true);
+    } catch (error) {
+      console.error("Error al cancelar la solicitud:", error);
+    } finally {
+      setDeleting(false);
+      await fetchSolicitudes();
+    }
+  };
+
+  const handleCloseDeleteSuccessModal = () => {
+    setDeleteSuccess(false);
+  };
+
+  // Funciones para ver detalle de la solicitud
+
+  const openDetailsModal = (id) => {
+    setSelectedSolicitudView(id);
+    setShowDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedSolicitudView(0);
+  };
+
+  // Descarga el resultado de la solicitud
+  const downloadResults = async (id) => {
+    try {
+      const response = await getSolicitudResultado(id);
+
+      // Tomando en cuenta que response es un Blob
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Extrayendo el filename de la URL
+      const urlObject = new URL(url);
+      const pathname = urlObject.pathname;
+      const filename = pathname.substring(pathname.lastIndexOf("/") + 1);
+
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al descargar resultado:", error);
+    }
+  };
+
+  return (
+    <div className="mx-8 my-6">
+      <Box sx={{ color: "primary.main", mb: 4 }}>
+        <p className="font-bold text-3xl">Solicitudes</p>
+      </Box>
+
+      {/* Botón para crear solicitud */}
+      <Box sx={{ mb: 4 }}>
         <Button
           variant="contained"
+          onClick={handleCreateSolicitud}
           startIcon={<AddIcon />}
-          onClick={nuevaSolicitud}
         >
-          Nueva Solicitud
+          Nueva solicitud
         </Button>
-      </Link>
+      </Box>
 
+      {/* Tabla */}
       <DataGrid
-      id = "dgSolicitudes"
-        rows={rows}
+        autoHeight
         columns={columns}
+        rows={solicitudList}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
+            paginationModel: { pageSize: 10 },
           },
         }}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[10]}
+        disableRowSelectionOnClick
+        slots={{ noRowsOverlay: NoRowsOverlay }}
+        loading={loading}
       />
 
-      <Button
-        variant="contained"
-        startIcon={<SimCardDownloadIcon />}
-        onClick={exportarSolicitudes}
-      >
-        Exportar Solicitudes
-      </Button>
+      <SolicitudDetailsModal
+        open={showDetailsModal}
+        onClose={closeDetailsModal}
+        id={selectedSolicitudView}
+      />
 
-      {/* Detalle de la solicitud */}
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <h2
-            style={{ color: "rgb(4, 35, 84)" }}
-            className=" font-bold text-3xl mb-4"
-          >
-            Detalle de Solicitud
-          </h2>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>ID</div>
-            <div>
-              <TextField
-                id="outlined-size-small "
-                value={lid}
-                size="small"
-                variant="standard"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>Fecha de registro</div>
-            <div>
-              <TextField
-                id="outlined-size-small "
-                value={lfecharegistro}
-                size="small"
-                variant="standard"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>Estado</div>
-            <div>
-              <TextField
-                variant="standard"
-                id="outlined-size-small "
-                value={lestado}
-                size="small"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>CPU</div>
-            <div>
-              <TextField
-                variant="standard"
-                id="outlined-size-small "
-                value={lcpu}
-                size="small"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>Cantidad de núcleos</div>
-            <div>
-              <TextField
-                variant="standard"
-                id="outlined-size-small"
-                value={lnucleo}
-                size="small"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>Frecuencia del procesador</div>
-            <div>
-              <TextField
-                variant="standard"
-                id="outlined-size-small"
-                value={ lfrecuencia}
-                size="small"
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ marginRight: "auto" }}>Tamaño de memoria RAM</div>
-            <div>
-              <TextField
-                variant="standard"
-                id="outlined-size-small "
-                value={ltamano}
-                size="small"
-              />
-            </div>
-          </div>
-        </Box>
-      </Modal>
+      <WarningModal
+        open={showWarningModal}
+        onClose={handleCancelDeletion}
+        onConfirm={handleConfirmDeletion}
+        content={{
+          title: "¿Deseas cancelar esta solicitud?",
+          body: "Esta acción no se puede deshacer.",
+          cancelText: "No, volver",
+          confirmText: "Sí, cancelar solicitud",
+        }}
+      />
 
-      {/* Confirmar la cancelacion */}
-      <Dialog
-        open={openC}
-        onClose={handleCloseC}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"¿Cancelar la solicitud seleccionada?"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Esta acción es irreversible.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseC} autoFocus>
-            No
-          </Button>
-          <Button onClick={confirmarCancelar}>Sí</Button>
-        </DialogActions>
-      </Dialog>
+      <SuccessModal
+        open={deleteSuccess}
+        onClose={handleCloseDeleteSuccessModal}
+        content="La solicitud ha sido cancelada."
+      />
+
+      <ProgressModal
+        open={deleting}
+        content={{
+          title: "Cancelando solicitud...",
+          body: "Espera un momento, por favor.",
+        }}
+      />
     </div>
   );
 }

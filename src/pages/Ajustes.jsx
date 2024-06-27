@@ -1,110 +1,124 @@
-import Alert from "@mui/material/Alert";
+import { useState, useEffect } from "react";
+import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Collapse from "@mui/material/Collapse";
-import TextField from "@mui/material/TextField";
-import Divider from "@mui/material/Divider";
-import { useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import AjusteItem from "../components/AjusteItem";
+import LoadingOverlay from "../components/LoadingOverlay";
+import SuccessModal from "../components/SuccessModal";
+import { listAjustes, bulkUpdateAjustes } from "../api/Ajustes";
+
+const successMessage = "Se han guardado los ajustes con éxito.";
 
 function Ajustes() {
-  const [showAlert, setShowAlert] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [ajustesList, setAjustesList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = () => {
-    // TODO: Guardar cambios
-
-    // Vuelve a animar la alerta si no ha sido cerrada
-    if (showAlert) {
-      setShowAlert(false);
-      setTimeout(() => {
-        setShowAlert(true);
-      }, 250);
-    } else {
-      setShowAlert(true);
+  // Obtener ajustes
+  const fetchAjustes = async () => {
+    setLoading(true);
+    try {
+      const response = await listAjustes();
+      setAjustesList(response.data);
+    } catch (error) {
+      console.error("Error al obtener ajustes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Obtener ajustes al renderizar
+  useEffect(() => {
+    fetchAjustes();
+  }, []);
+
+  // Guardar ajustes
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      await bulkUpdateAjustes(ajustesList);
+      openSuccessModal();
+      await fetchAjustes();
+    } catch (error) {
+      console.log("Error al guardar ajustes", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Maneja cambios de ajustes
+  const handleChange = (id, value) => {
+    setAjustesList((prev) =>
+      prev.map((ajuste) =>
+        ajuste.id === id ? { ...ajuste, valor: value } : ajuste
+      )
+    );
+  };
+
+  // Handlers para modals
+
+  const openSuccessModal = () => {
+    setShowSuccessModal(true);
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+  };
+
   return (
-    <div className="mx-4 my-4">
-      <Box sx={{ color: "primary.main" }}>
-        <h1 className="font-bold text-3xl mb-4">Ajustes</h1>
+    <div className="mx-8 my-6">
+      {/* Título */}
+      <Box sx={{ color: "primary.main", mb: 2 }}>
+        <p className="font-bold text-3xl">Ajustes</p>
       </Box>
 
-      <Collapse in={showAlert}>
-        <Alert
-          severity="success"
-          onClose={() => {
-            setShowAlert(false);
-          }}
-        >
-          Se han guardado los cambios con éxito.
-        </Alert>
-      </Collapse>
+      {/* Contenedor de ajustes */}
       <Box
         sx={{
           px: 2,
           py: 3,
+          position: "relative",
+          minHeight: "20rem",
           display: "flex",
           flexDirection: "column",
-          gap: "1rem",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box>
-            <p className="font-semibold">Recursos máximos por usuario</p>
-            <p className="text-sm font-light">
-              Cantidad máxima de recursos a disposición del mismo usuario
-            </p>
-          </Box>
-          <TextField
-            margin="dense"
-            id="recursosMax"
-            name="recursosMax"
-            type="number"
-            inputProps={{ min: 0 }}
-            defaultValue={1}
-            // value={}
-            // error={}
-            // onChange={handleChange}
+        {(loading || saving) && (
+          <LoadingOverlay
+            backgroundColor={loading ? "white" : "rgba(255, 255, 255, 0.5)"}
+            content={loading ? "Cargando ajustes..." : "Guardando ajustes..."}
           />
-        </Box>
-        <Divider />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box>
-            <p className="font-semibold">Tiempo de uso máximo</p>
-            <p className="text-sm font-light">
-              Tiempo de uso de recursos antes de una notificación
-            </p>
-          </Box>
-          <TextField
-            margin="dense"
-            id="tiempoMax"
-            name="tiempoMax"
-            type="number"
-            inputProps={{ min: 0 }}
-            defaultValue={1}
-            // value={}
-            // error={}
-            // onChange={handleChange}
+        )}
+
+        {/* Iteración sobre lista de ajustes */}
+        {ajustesList.map((ajuste) => (
+          <AjusteItem
+            key={ajuste.id}
+            ajuste={ajuste}
+            handleChange={handleChange}
           />
-        </Box>
+        ))}
+
+        {/* Botón de guardado */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-          <Button variant="contained" onClick={handleSubmit}>
-            Confirmar
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={loading || saving}
+          >
+            Guardar
           </Button>
         </Box>
       </Box>
+
+      {/* Modal de éxito */}
+      <SuccessModal
+        open={showSuccessModal}
+        onClose={closeSuccessModal}
+        content={successMessage}
+      />
     </div>
   );
 }

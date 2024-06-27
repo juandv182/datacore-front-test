@@ -1,45 +1,33 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import EditIcon from "@mui/icons-material/Edit";
 import EditUserModal from "../components/EditUserModal";
 import SuccessModal from "../components/SuccessModal";
 import NoRowsOverlay from "../components/NoRowsOverlay";
 import {
-  getUsuariosValidos,
+  getUsuariosDesautorizados,
   getAllEstadoPersona,
   getAllFacultad,
   getAllEspecialidades,
 } from "../api/Users";
 
-function UsuariosAutorizados() {
+function UsuariosDesautorizados() {
   const columns = [
     { field: "id", headerName: "ID", width: 50 },
     { field: "nombres", headerName: "Nombres", width: 220 },
     { field: "correo", headerName: "Correo", width: 220 },
     { field: "facultad", headerName: "Facultad", width: 180 },
+    { field: "especialidad", headerName: "Especialidad", width: 180 },
     {
-      field: "especialidad",
-      headerName: "Especialidad",
-      width: 180,
-    },
-    {
-      field: "recursos_max",
-      headerName: "Recursos máx.",
+      field: "fecha_deshabilitacion",
+      headerName: "Fecha deshabilitación",
       width: 130,
     },
+    { field: "motivo", headerName: "Motivo", width: 100, sortable: false },
     {
-      field: "horas_max",
-      headerName: "Horas máx.",
-      width: 100,
-    },
-    {
-      field: "opciones",
+      field: "options",
       headerName: "Opciones",
       width: 100,
       sortable: false,
@@ -52,18 +40,16 @@ function UsuariosAutorizados() {
   ];
 
   const [userList, setUserList] = useState([]);
-  const [filteredUserList, setFilteredUserList] = useState([]);
   const [facultadList, setFacultadList] = useState([]);
   const [especialidadList, setEspecialidadList] = useState([]);
   const [estadoList, setEstadoList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(0);
-  const [selectedEstado, setSelectedEstado] = useState(0);
   const [listsFetched, setListsFetched] = useState(false);
   const [usersFetched, setUsersFetched] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Obtiene listas de estados, facultades, especialidades
+  // Obtiene listas de facultades y especialidades
   const fetchLists = async () => {
     setListsFetched(false);
     setUsersFetched(false);
@@ -81,14 +67,14 @@ function UsuariosAutorizados() {
 
       setListsFetched(true);
     } catch (error) {
-      console.error("Error al recuperar datos:", error);
+      console.error("Error al cargar listas:", error);
     }
   };
 
-  // Obtiene usuarios
+  // Obtiene usuarios desautorizados
   const fetchUserList = async () => {
     try {
-      const response = await getUsuariosValidos();
+      const response = await getUsuariosDesautorizados();
 
       const users = response.data.map((user) => {
         const facultadObj = facultadList.find(
@@ -104,28 +90,15 @@ function UsuariosAutorizados() {
           correo: user.email,
           facultad: facultadObj ? facultadObj.nombre : "",
           especialidad: especialidadObj ? especialidadObj.nombre : "",
-          recursos_max: user.recursos_max,
-          horas_max: user.horas_max,
-          estado: user.id_estado_persona,
+          fecha_deshabilitacion: user.fecha_deshabilitacion || "",
+          motivo: user.motivo_desautorizado || "",
         };
       });
 
       setUserList(users);
       setUsersFetched(true);
     } catch (error) {
-      console.error("Error al cargar usuarios:", error);
-    }
-  };
-
-  // Filtra usuarios dependiendo del estado
-  const filterUsers = () => {
-    if (selectedEstado === 0) {
-      setFilteredUserList(userList);
-    } else {
-      const filteredUsers = userList.filter(
-        (user) => user.estado === Number(selectedEstado)
-      );
-      setFilteredUserList(filteredUsers);
+      console.error("Error al cargar usuarios desautorizados:", error);
     }
   };
 
@@ -141,18 +114,7 @@ function UsuariosAutorizados() {
     }
   }, [listsFetched, facultadList, especialidadList]);
 
-  // Llama a la función de filtración cuando cambia el estado o la lista base
-  useEffect(() => {
-    if (usersFetched) {
-      filterUsers();
-    }
-  }, [usersFetched, selectedEstado, userList]);
-
   // Handlers y funciones para modals
-
-  const handleEstadoChange = (event) => {
-    setSelectedEstado(event.target.value);
-  };
 
   const openEditModal = (id) => {
     setSelectedUser(id);
@@ -176,40 +138,13 @@ function UsuariosAutorizados() {
   return (
     <div className="mx-8 my-6">
       <Box sx={{ color: "primary.main", mb: 4 }}>
-        <p className="font-bold text-3xl">Lista de usuarios autorizados</p>
+        <p className="font-bold text-3xl">Lista de usuarios desautorizados</p>
       </Box>
 
-      {/* Filtro de estado */}
-      <Box sx={{ mb: 4 }}>
-        <FormControl sx={{ minWidth: "10rem" }}>
-          <InputLabel id="estado-label">Estado</InputLabel>
-          <Select
-            labelId="estado-label"
-            id="estado-filter"
-            value={selectedEstado}
-            onChange={handleEstadoChange}
-            label="Estado"
-            disabled={!(listsFetched && usersFetched) || userList.length === 0}
-          >
-            <MenuItem key={0} value={0}>
-              TODOS
-            </MenuItem>
-            {estadoList
-              .filter(({ nombre }) => nombre !== "DESAUTORIZADO")
-              .map(({ id_estado_persona, nombre }) => (
-                <MenuItem key={id_estado_persona} value={id_estado_persona}>
-                  {nombre}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-      </Box>
-
-      {/* Tabla */}
       <DataGrid
         autoHeight
         columns={columns}
-        rows={filteredUserList}
+        rows={userList}
         initialState={{
           pagination: {
             paginationModel: {
@@ -242,4 +177,4 @@ function UsuariosAutorizados() {
   );
 }
 
-export default UsuariosAutorizados;
+export default UsuariosDesautorizados;

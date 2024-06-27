@@ -5,49 +5,52 @@ import { useTheme } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
+import HelpIcon from "@mui/icons-material/Help";
+
+const iconStyles = { color: "white", fontSize: "1.75rem" };
+export const navbarHeight = "110px";
 
 function Navbar({ sidebarToggle, setSidebarToggle }) {
   const theme = useTheme();
   const { handlerLogout } = useContext(AuthContext);
 
   return (
-    <div className={`${sidebarToggle ? "" : "ml-64"} w-full`}>
+    <div
+      className={`fixed top-0 right-0 z-10 transition-all duration-300`}
+      style={{
+        width: sidebarToggle ? "100%" : "calc(100% - 16rem)",
+      }}
+    >
       <nav
-        className="px-6 py-6 flex justify-between"
-        style={{ backgroundColor: theme.palette.primary.main }}
+        className="p-6 flex justify-between"
+        style={{
+          backgroundColor: theme.palette.primary.main,
+          height: navbarHeight,
+        }}
       >
-        <div className="flex flex-row items-center">
+        {/* Menú y logo */}
+        <div className="flex items-center gap-7">
           <IconButton onClick={() => setSidebarToggle(!sidebarToggle)}>
-            <MenuIcon
-              sx={{
-                color: "white",
-                fontSize: "1.75rem",
-              }}
-            />
+            <MenuIcon sx={iconStyles} />
           </IconButton>
-          
+
           <Link to="/">
-          <div className="d-flex justify-content-start align-items-center">
             <img
-              src="/src/assets/Logo_PUCP.png"
+              src="/src/assets/datacore_logo.svg"
               alt="DataCore"
-              style={{ height: "2.5rem", marginLeft: "1.75rem" }}
+              style={{ height: "60px" }}
             />
-            <h1 className="text-white" style={{
-              fontFamily: "Montserrat",fontSize: "1.5rem"
-            }}>DataCore</h1>
-            </div>
           </Link>
-          
         </div>
-        <div className="flex items-center">
+
+        {/* Ayuda y cerrar sesión */}
+        <div className="flex items-center gap-7">
+          <IconButton component={Link} to="/ayuda">
+            <HelpIcon sx={iconStyles} />
+          </IconButton>
+
           <IconButton onClick={handlerLogout}>
-            <LogoutIcon
-              sx={{
-                color: "white",
-                fontSize: "1.75rem",
-              }}
-            />
+            <LogoutIcon sx={iconStyles} />
           </IconButton>
         </div>
       </nav>

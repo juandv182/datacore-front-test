@@ -1,10 +1,10 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 
 /**
- * Modal para operaciones finalizadas con éxito
+ * Modal para mostrar errores
  *
  * @param {object} props
  * @param {boolean} props.open Indica la visibilidad del modal
@@ -12,7 +12,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
  * @param {string} props.content Contenido del mensaje mostrado
  * @returns {JSX.Element}
  */
-function SuccessModal({ open, onClose, content }) {
+function ErrorModal({ open, onClose, content }) {
   return (
     <div>
       <Dialog
@@ -34,11 +34,11 @@ function SuccessModal({ open, onClose, content }) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              color: "primary.main",
+              color: "error.main",
             }}
           >
-            <CheckCircleIcon sx={{ mb: 2, fontSize: "5rem" }} />
-            <p className="text-center text-2xl font-semibold">¡Todo listo!</p>
+            <ErrorIcon sx={{ mb: 2, fontSize: "5rem" }} />
+            <p className="text-center text-2xl font-semibold">¡Error!</p>
           </Box>
 
           {/* Contenido */}
@@ -55,8 +55,8 @@ function SuccessModal({ open, onClose, content }) {
               alignItems: "center",
             }}
           >
-            <Button onClick={onClose} variant="contained">
-              Aceptar
+            <Button onClick={onClose} variant="contained" color="error">
+              Cerrar
             </Button>
           </Box>
         </Box>
@@ -64,4 +64,5 @@ function SuccessModal({ open, onClose, content }) {
     </div>
   );
 }
-export default SuccessModal;
+
+export default ErrorModal;
